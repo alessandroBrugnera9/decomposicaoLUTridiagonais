@@ -39,15 +39,15 @@ def LUDecomposition(aVector, bVector, cVector):
     LVector = np.zeros(size)
     UVector = np.zeros(size)
     UVector[0] = bVector[0]
-    
+
     for i in range(1, size):
         LVector[i] = aVector[i]/UVector[i-1]
         UVector[i] = bVector[i]-LVector[i]*cVector[i-1]
-    
-    return (LVector,UVector)
+
+    return (LVector, UVector)
 
 
-def solveLUSystem(LVector, UVector, dVector, cVector):
+def solveLUSystem(LVector, UVector, cVector, dVector) -> np.ndarray:
     # L,U,d,c,x,y are vectors necessay to solve the linear syste
     size = len(LVector)
     xVector = np.zeros(size)
@@ -59,13 +59,14 @@ def solveLUSystem(LVector, UVector, dVector, cVector):
     xVector[size-1] = yVector[size-1]/UVector[size-1]
     for j in range(size-2, -1, -1):
         xVector[j] = (yVector[j]-cVector[j]*xVector[j+1])/UVector[j]
-    
-    return (xVector,yVector)
 
-def buildTridiagonalMatrix(aVector, bVector, cVector):
+    return xVector
+
+
+def buildTridiagonalMatrix(aVector, bVector, cVector) -> np.ndarray:
     size = len(aVector)
-    aMatrix = np.zeros((size,size))
-    for i in range(size):
+    aMatrix = np.zeros((size, size))
+    for i in range(size-1):
         aMatrix[i][i] = bVector[i]
 
         # upper diagonal
@@ -73,13 +74,30 @@ def buildTridiagonalMatrix(aVector, bVector, cVector):
 
         # lower diagonal
         aMatrix[i][i-1] = aVector[i]
-    
+
+    aMatrix[size-1][size-1] = bVector[size-1]
+    aMatrix[size-1][0] = cVector[size-1]
+    aMatrix[size-1][size-1-1] = aVector[size-1]
+
     return aMatrix
+
 
 def main():
     # TODO: define condition for verbose
-    aVector, bVector, cVector, dVector = buildTestSystem(6)
-    print(buildTridiagonalMatrix(aVector, bVector, cVector))
+    aVector, bVector, cVector, dVector = buildTestSystem(20)
+    aMatrix = buildTridiagonalMatrix(aVector, bVector, cVector)
+    print(aMatrix)
+
+    LVector, UVector = LUDecomposition(aVector, bVector, cVector)
+    xVector = solveLUSystem(LVector, UVector, cVector, dVector)
+
+    solved=aMatrix@xVector
+    print(solved)
+    print(dVector)
+    # print(solved-dVector)
+    # print(np.square(solved-dVector))
+    print(np.square(solved-dVector).sum())
+    print(np.sqrt(np.square(solved-dVector).mean()))
 
 
 main()
