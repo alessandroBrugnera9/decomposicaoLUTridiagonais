@@ -2,7 +2,7 @@ from typing import Tuple
 import numpy as np
 
 
-def buildTestSystem(size: int, cyclic: bool = False) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def buildTestSystem(size: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     aVector = np.zeros(size)
     bVector = np.zeros(size)
     cVector = np.zeros(size)
@@ -21,9 +21,6 @@ def buildTestSystem(size: int, cyclic: bool = False) -> Tuple[np.ndarray, np.nda
     cVector[size-1] = upperValue
     dVector[size-1] = 1
 
-    if(not cyclic):
-        aVector[0] = 0
-        cVector[-1] = 0
 
     return (aVector, bVector, cVector, dVector)
 
@@ -53,6 +50,7 @@ def solveLUSystem(LVector, UVector, cVector, dVector) -> np.ndarray:
     xVector = np.zeros(size)
     yVector = np.zeros(size)
     yVector[0] = dVector[0]
+    print(list(range(size-2, -1, -1)))
 
     for i in range(1, size):
         yVector[i] = dVector[i]-LVector[i]*yVector[i-1]
@@ -63,8 +61,8 @@ def solveLUSystem(LVector, UVector, cVector, dVector) -> np.ndarray:
     return xVector
 
 
-def buildTridiagonalMatrix(aVector, bVector, cVector) -> np.ndarray:
-    size = len(aVector)
+def buildTridiagonalMatrix(aVector, bVector, cVector, offset=0) -> np.ndarray:
+    size = len(aVector)-offset
     aMatrix = np.zeros((size, size))
     for i in range(size-1):
         aMatrix[i][i] = bVector[i]
@@ -82,16 +80,17 @@ def buildTridiagonalMatrix(aVector, bVector, cVector) -> np.ndarray:
     return aMatrix
 
 
-def main():
+def main(matrixSize=20, cyclic=False):
     # TODO: define condition for verbose
-    aVector, bVector, cVector, dVector = buildTestSystem(20)
+    aVector, bVector, cVector, dVector = buildTestSystem(
+        matrixSize, cyclic=cyclic)
     aMatrix = buildTridiagonalMatrix(aVector, bVector, cVector)
     print(aMatrix)
 
     LVector, UVector = LUDecomposition(aVector, bVector, cVector)
     xVector = solveLUSystem(LVector, UVector, cVector, dVector)
 
-    solved=aMatrix@xVector
+    solved = aMatrix@xVector
     print(solved)
     print(dVector)
     # print(solved-dVector)
@@ -99,5 +98,24 @@ def main():
     print(np.square(solved-dVector).sum())
     print(np.sqrt(np.square(solved-dVector).mean()))
 
+    if cyclic:
+        # creating vectors necessaries to solve cyclic systems
+        # building n-1xn-1n matrix to solve for cyclic systems
+        tMatrix = buildTridiagonalMatrix(aVector, bVector, cVector, offset=1)
+        # building v vector  for cyclic systems
+        vVector = np.zeros(matrixSize-1)
+        vVector[0] = aVector[0]
+        vVector[-1] = cVector[-2]
+        # building w vector  for cyclic systems
+        wVector = np.zeros(matrixSize-1)
+        wVector[0] = cVector[-1]
+        wVector[-1] = aVector[-1]
+
+        # 
+        LVector, UVector = LUDecomposition(aVector, bVector, cVector)
+        zTilde = solveLUSystem(LVector, UVector, cVector, dVector)
+        xTilde = xVector[:-1]
+
+        xN= (dVector[-1]-cVector[-1])
 
 main()
