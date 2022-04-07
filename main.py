@@ -8,12 +8,12 @@ def buildTestSystem(size: int, cyclic: bool = False) -> Tuple[np.ndarray, np.nda
     cVector = np.zeros(size)
     dVector = np.zeros(size)
 
-    for n in range(size-1):
-        upperValue = (2*(n+1)-1)/(4*(n+1))
-        aVector[n] = 1 - upperValue
-        bVector[n] = 2
-        cVector[n] = upperValue
-        dVector[n] = np.cos(2*np.pi*((n+1)**2)/(size**2))
+    for i in range(size-1):
+        upperValue = (2*(i+1)-1)/(4*(i+1))
+        aVector[i] = 1 - upperValue
+        bVector[i] = 2
+        cVector[i] = upperValue
+        dVector[i] = np.cos(2*np.pi*((i+1)**2)/(size**2))
     # overriding last entry
     upperValue = (2*size-1)/(4*size)
     aVector[size-1] = 1 - upperValue
@@ -31,26 +31,36 @@ def buildTestSystem(size: int, cyclic: bool = False) -> Tuple[np.ndarray, np.nda
 verbose = True
 
 
-def LUDecomposition(aVector, bVector, cVector, L, U):
+def LUDecomposition(aVector, bVector, cVector):
     # the tridigonalmatrix is represented using only 3 vectors
-    n = len(aVector)
-    U[0] = bVector[0]
-    for i in range(1, n, 1):
+    # only the important value of L (upperdiagonal),U(maindiagional) are calculated
+    size = len(aVector)
+
+    LVector = np.zeros(size)
+    UVector = np.zeros(size)
+    UVector[0] = bVector[0]
+
+    for i in range(1, size):
         L[i] = aVector[i]/U[i-1]
         U[i] = bVector[i]-L[i]*cVector[i-1]
-    return
+    
+    return (LVector,UVector)
 
 
-def resolve_LU_tridiagonal(L, U, d, c, x, y):
-    # L,U,d,c,x,y são vetores // este algoritmo supõe uma matriz nxn //
-    n = len(L)
-    y[0] = d[0]
-    for i in range(1, n, 1):
-        y[i] = d[i]-L[i]*y[i-1]
-    x[n-1] = y[n-1]/U[n-1]
-    for j in range(n-2, -1, -1):
-        x[j] = (y[j]-c[j]*x[j+1])/U[j]
-    return
+def solveLUSystem(LVector, UVector, dVector, cVector):
+    # L,U,d,c,x,y are vectors necessay to solve the linear syste
+    size = len(LVector)
+    xVector = np.zeros(size)
+    yVector = np.zeros(size)
+    yVector[0] = dVector[0]
+
+    for i in range(1, size):
+        yVector[i] = dVector[i]-LVector[i]*yVector[i-1]
+    xVector[size-1] = yVector[size-1]/UVector[size-1]
+    for j in range(size-2, -1, -1):
+        xVector[j] = (yVector[j]-cVector[j]*xVector[j+1])/UVector[j]
+    
+    return (xVector,yVector)
 
 
 def main():
