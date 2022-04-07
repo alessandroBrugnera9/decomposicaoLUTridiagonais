@@ -76,7 +76,6 @@ def buildTridiagonalMatrix(aVector, bVector, cVector, offset=0) -> np.ndarray:
 
 
 def main(matrixSize=6, cyclic=True):
-    # TODO: define condition for verbose
     aVector, bVector, cVector, dVector = buildTestSystem(matrixSize)
 
     if cyclic:
@@ -110,23 +109,17 @@ def main(matrixSize=6, cyclic=True):
         xVector = solveLUSystem(LVector, UVector, cVector, dVector)
 
     aMatrix = buildTridiagonalMatrix(aVector, bVector, cVector)
-    # print(aMatrix)
-    # Analyzing the solutions
-    xSolver= np.linalg.solve(aMatrix,dVector)
-    print(xSolver)
-    print(xVector)
-    # print("X difference")
-    # print(np.square(xVector-xSolver).sum())
-    # print(np.sqrt(np.square(xVector-xSolver).mean()))
 
-    solved = aMatrix@xVector
-    # print(solved)
-    # print(dVector)
-    # print("Solved difference")
-    # print(np.square(solved-dVector).sum())
-    print(np.sqrt(np.square(solved-dVector).mean()))
-    solved = aMatrix@xSolver
-    print(np.sqrt(np.square(solved-dVector).mean()))
+    print("Solution: ")
+    print(xVector.tolist())
+    print()
+    # Analyzing the solutions
+    calculatedValue = aMatrix@xVector
+    print("Comparing true value of the system multiplication (D Vector) to A*x:")
+    print()
+    print((calculatedValue-dVector).tolist())
+    print("Residual Quadratic Error: ", np.square(calculatedValue-dVector).sum())
+    print("Mean Root Quadratic Error: ",np.sqrt(np.square(calculatedValue-dVector).mean()))
         
 main(cyclic=False)
 main(cyclic=True)
