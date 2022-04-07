@@ -39,10 +39,10 @@ def LUDecomposition(aVector, bVector, cVector):
     LVector = np.zeros(size)
     UVector = np.zeros(size)
     UVector[0] = bVector[0]
-
+    
     for i in range(1, size):
-        L[i] = aVector[i]/U[i-1]
-        U[i] = bVector[i]-L[i]*cVector[i-1]
+        LVector[i] = aVector[i]/UVector[i-1]
+        UVector[i] = bVector[i]-LVector[i]*cVector[i-1]
     
     return (LVector,UVector)
 
