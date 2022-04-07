@@ -62,11 +62,24 @@ def solveLUSystem(LVector, UVector, dVector, cVector):
     
     return (xVector,yVector)
 
+def buildTridiagonalMatrix(aVector, bVector, cVector):
+    size = len(aVector)
+    aMatrix = np.zeros((size,size))
+    for i in range(size):
+        aMatrix[i][i] = bVector[i]
+
+        # upper diagonal
+        aMatrix[i][i+1] = cVector[i]
+
+        # lower diagonal
+        aMatrix[i][i-1] = aVector[i]
+    
+    return aMatrix
 
 def main():
     # TODO: define condition for verbose
     aVector, bVector, cVector, dVector = buildTestSystem(6)
-    print(aVector, bVector, cVector, dVector)
+    print(buildTridiagonalMatrix(aVector, bVector, cVector))
 
 
 main()
