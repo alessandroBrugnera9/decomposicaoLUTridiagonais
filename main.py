@@ -98,7 +98,6 @@ def main(matrixSize=20, cyclic=True):
         xN = (dVector[-1]-cVector[-1]*yTilde[0]-aVector[-1]*yTilde[-1])/(bVector[-1]-cVector[-1]*zTilde[0]-aVector[-1]*zTilde[-1])
         xTilde = yTilde-xN*zTilde
 
-        #TODO: Append xVector properly
         xVector = np.append(xTilde, xN)
     else: # getting the solution for non cyclic systems
         aVector[0]=0
@@ -112,6 +111,7 @@ def main(matrixSize=20, cyclic=True):
 
     print("Solution: ")
     print(xVector.tolist())
+    np.savetxt("mydata.csv", xVector, delimiter=' & ', fmt='%2.1e', newline=' & ')
     print()
     # Analyzing the solutions
     calculatedValue = aMatrix@xVector
@@ -122,13 +122,6 @@ def main(matrixSize=20, cyclic=True):
     print("Mean Root Quadratic Error: ",np.sqrt(np.square(calculatedValue-dVector).mean()))
 
 
-
-    xSolver= np.linalg.solve(aMatrix,dVector)
-    calculatedValue = aMatrix@xSolver
-    print("Mean Root Quadratic Error Linalg: ",np.sqrt(np.square(calculatedValue-dVector).mean()))
-    print("Comparing linalg x to calculated: ")
-    print((xSolver-xVector).tolist())
-    print()
-        
-main(matrixSize=20, cyclic=False)
-main(matrixSize=20, cyclic=True)
+if __name__=='__main__':
+    main(matrixSize=10, cyclic=False)
+    main(matrixSize=10, cyclic=True)
