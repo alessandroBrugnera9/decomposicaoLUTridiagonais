@@ -75,9 +75,10 @@ def buildTridiagonalMatrix(aVector, bVector, cVector, offset=0) -> np.ndarray:
     return aMatrix
 
 
-def main(matrixSize=6, cyclic=True):
+def main(matrixSize=20, cyclic=True):
+    print("Cyclic: ", cyclic)
     aVector, bVector, cVector, dVector = buildTestSystem(matrixSize)
-
+    
     if cyclic:
         # creating vectors necessaries to solve cyclic systems
         # building v vector  for cyclic systems
@@ -93,15 +94,12 @@ def main(matrixSize=6, cyclic=True):
         LVector, UVector = LUDecomposition(aVector[:-1], bVector[:-1], cVector[:-1])
         yTilde = solveLUSystem(LVector, UVector, cVector[:-1], dVector[:-1])
         zTilde = solveLUSystem(LVector, UVector, cVector[:-1], vVector)
-        
 
-        xN = (dVector[-1]-cVector[-1]*yTilde[0]-aVector[-1]*yTilde[-2])/(bVector[-1]-cVector[-1]*zTilde[0]-aVector[-1]*zTilde[-2])
+        xN = (dVector[-1]-cVector[-1]*yTilde[0]-aVector[-1]*yTilde[-1])/(bVector[-1]-cVector[-1]*zTilde[0]-aVector[-1]*zTilde[-1])
         xTilde = yTilde-xN*zTilde
 
-        # Append xVector properly
-        xVector = xTilde.tolist()
-        xVector.append(xN)
-        xVector = np.array(xVector)
+        #TODO: Append xVector properly
+        xVector = np.append(xTilde, xN)
     else: # getting the solution for non cyclic systems
         aVector[0]=0
         cVector[-1]=0
@@ -110,16 +108,27 @@ def main(matrixSize=6, cyclic=True):
 
     aMatrix = buildTridiagonalMatrix(aVector, bVector, cVector)
 
+
+
     print("Solution: ")
     print(xVector.tolist())
     print()
     # Analyzing the solutions
     calculatedValue = aMatrix@xVector
     print("Comparing true value of the system multiplication (D Vector) to A*x:")
-    print()
     print((calculatedValue-dVector).tolist())
+    print()
     print("Residual Quadratic Error: ", np.square(calculatedValue-dVector).sum())
     print("Mean Root Quadratic Error: ",np.sqrt(np.square(calculatedValue-dVector).mean()))
+
+
+
+    xSolver= np.linalg.solve(aMatrix,dVector)
+    calculatedValue = aMatrix@xSolver
+    print("Mean Root Quadratic Error Linalg: ",np.sqrt(np.square(calculatedValue-dVector).mean()))
+    print("Comparing linalg x to calculated: ")
+    print((xSolver-xVector).tolist())
+    print()
         
-main(cyclic=False)
-main(cyclic=True)
+main(matrixSize=20, cyclic=False)
+main(matrixSize=20, cyclic=True)
