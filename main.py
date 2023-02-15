@@ -111,7 +111,7 @@ def main(matrixSize=20, cyclic=True):
 
     print("Solution: ")
     print(xVector.tolist())
-    np.savetxt("mydata.csv", xVector, delimiter=' & ', fmt='%2.1e', newline=' & ')
+    # np.savetxt("mydata.csv", xVector, delimiter=' & ', fmt='%2.1e', newline=' & ')
     print()
     # Analyzing the solutions
     calculatedValue = aMatrix@xVector
@@ -123,5 +123,5 @@ def main(matrixSize=20, cyclic=True):
 
 
 if __name__=='__main__':
-    main(matrixSize=10, cyclic=False)
-    main(matrixSize=10, cyclic=True)
+    main(matrixSize=20, cyclic=False)
+    main(matrixSize=20, cyclic=True)
